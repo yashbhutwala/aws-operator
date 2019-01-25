@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_0_0"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/v21/controllercontext"
@@ -202,6 +203,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	{
 		certFiles := certs.NewFilesClusterMaster(e.ClusterCerts)
+		logger, err := micrologger.New(micrologger.Config{})
 
 		for _, f := range certFiles {
 			// TODO We should just pass ctx to Files.
@@ -209,11 +211,14 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			// 	See https://github.com/giantswarm/giantswarm/issues/4329.
 			//
 			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
+			logger.Log("level", "ignition-pre-encryption", f.AbsolutePath, string(f.Data))
 
 			data, err := e.encrypt(ctx, f.Data)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
+
+			logger.Log("level", "ignition-encryption", f.AbsolutePath, string(data))
 
 			meta := k8scloudconfig.FileMetadata{
 				AssetContent: string(data),
