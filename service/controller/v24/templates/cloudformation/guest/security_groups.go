@@ -69,23 +69,6 @@ const SecurityGroups = `{{define "security_groups" }}
         - Key: Name
           Value: {{ $v.IngressSecurityGroupName }}
 
-  EtcdELBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: {{ $v.EtcdELBSecurityGroupName }}
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      {{ range $v.EtcdELBSecurityGroupRules }}
-      -
-        IpProtocol: {{ .Protocol }}
-        FromPort: {{ .Port }}
-        ToPort: {{ .Port }}
-        CidrIp: {{ .SourceCIDR }}
-      {{ end }}
-      Tags:
-        - Key: Name
-          Value: {{ $v.EtcdELBSecurityGroupName }}
-
   # Allow all access between masters and workers for calico. This is done after
   # the other rules to avoid circular dependencies.
   MasterAllowCalicoIngressRule:

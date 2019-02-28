@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	ignition "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_2_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
@@ -49,7 +49,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-		template, err := ccService.NewMasterTemplate(ctx, tc.CustomObject, certs.Cluster{}, tc.ClusterKeys)
+		template, err := ccService.NewMasterTemplate(ctx, tc.CustomObject, certs.Cluster{}, tc.ClusterKeys, 3)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}

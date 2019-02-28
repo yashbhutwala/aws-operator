@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_1_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_2_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -17,7 +17,7 @@ import (
 
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a string.
-func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, workerCount int) (string, error) {
 	var err error
 
 	ctlCtx, err := controllercontext.FromContext(ctx)
@@ -40,12 +40,14 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 
 		params = k8scloudconfig.DefaultParams()
 
+		if workerCount < 3 {
+			params.Calico.TyphaReplicas = 1
+		}
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
-		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			baseExtension: be,
 			ctlCtx:        ctlCtx,
